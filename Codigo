@@ -1,6 +1,7 @@
 # Práctica Morfología matemática
 # Homero Meneses Vázquez
 # Enrique Ramírez Pérez
+# Roberto Misael Reyes
 
 import cv2
 import numpy as np

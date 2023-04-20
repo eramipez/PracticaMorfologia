@@ -1,0 +1,57 @@
+# Práctica Morfología matemática
+# Homero Meneses Vázquez
+# Enrique Ramírez Pérez
+
+import cv2
+import numpy as np
+from google.colab.patches import cv2_imshow
+
+# Imagen 1 = Fondo
+# Imagen 2 = Fondo + Objeto
+img1 = cv2.imread('imagen1.jpeg')
+img2 = cv2.imread('imagen2.jpeg')
+
+
+# Convertir las imágenes a escala de grises
+gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+
+# Sacar la diferencia absoluta
+diff = cv2.absdiff(gray1, gray2)
+
+# Umbralizar para convertir la imagen en una máscara binaria
+_, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
+
+# Mostrar la imagen de antes
+cv2_imshow(thresh)
+
+# Elimina falsos positivos y falsos negativos
+kernel = np.ones((5,5),np.uint8)
+closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+# Elimina los bordes
+opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
+
+# Muestra el resultado 
+cv2_imshow(opening)
+
+# Imagen 3 = Nuevo fondo
+img3 = cv2.imread('imagen3.jpeg')
+
+# Redimensionar la imagen para que esté del mismo tamaño que las dos primeras
+img3_resized = cv2.resize(img3, (img1.shape[1], img1.shape[0]))
+
+# Convierte la imagen en una máscara booleana
+mask = opening.astype(np.bool)
+
+# Aplica la máscara booleana al objeto en la imagen 2
+masked_obj = img2 * mask[:,:,np.newaxis]
+
+# Aplica la máscara inversa a la imagen 3
+masked_bg = img3_resized * (~mask)[:,:,np.newaxis]
+
+# Combinar el objeto y el fondo
+final_img = masked_obj + masked_bg
+
+# Mostrar el resultado con el núevo fondo y el objeto
+cv2_imshow(final_img)
